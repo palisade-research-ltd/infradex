@@ -4,28 +4,26 @@ terraform {
   cloud {
     organization = "palisade"
     workspaces {
-      name = "signals-dev"
+      name = "infradex"
     }
   }
 
   required_providers {
-
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 6.12.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
-
   }
 
   required_version = ">= 1.9"
 
 }
 
-provider "google" {
+provider "aws" {
 
-  project     = var.prj_project_id
-  region      = var.prj_region
-  credentials = var.gcp_credentials
+  project     = var.pro_project_id
+  region      = var.pro_region
+  credentials = var.aws_credentials
 
 }
 

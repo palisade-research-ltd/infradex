@@ -1,102 +1,64 @@
 
-// --- ------------------------------------------------------------------------------ COMPUTE --- //
-// --- ------------------------------------------------------------------------------ ------- --- //
 
-resource "google_compute_instance" "compute_instance" {
-  
-  project      = var.prj_project_id
-  zone         = var.prj_zone
-  name         = var.cmp_instance_name
-  machine_type = var.cmp_instance_type
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
 
-  boot_disk {
-    initialize_params {
-      image = var.cmp_instance_image
-      size = 20
-      type = "pd-ssd"
-    }
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 
-  provisioner "remote-exec" {
-  
-    inline = [
-      "sudo mkdir -p /home/scripts",
-      "sudo chmod 777 /home/scripts"
-    ]
-    
-    connection {
-      type        = "ssh"
-      user        = var.gcp_ssh_usr_0
-      private_key = var.gcp_ssh_prv_0
-      host        = self.network_interface[0].access_config[0].nat_ip
-    }
-  
+  filter {
+    name   = "state"
+    values = ["available"]
   }
-
-  provisioner "file" {
-    source      = "${path.module}/scripts"
-    destination = "/home/scripts"
-    connection {
-      type        = "ssh"
-      agent       = false
-      user        = var.gcp_ssh_usr_0
-      private_key = var.gcp_ssh_prv_0
-      host        = self.network_interface[0].access_config[0].nat_ip
-    }
-  }
-
-  network_interface {
-    network       = "default"
-    access_config {
-      // any IP
-    }
-  }
-
-  metadata = {
-    
-    ssh-keys = join("\n", [
-      "${var.gcp_ssh_usr_0}:${var.gcp_ssh_pub_0}",
-      "${var.gcp_ssh_usr_1}:${var.gcp_ssh_pub_1}",
-      "${var.gcp_ssh_usr_2}:${var.gcp_ssh_pub_2}",
-    ])
-
-    gce-container-declaration = yamlencode({
-      spec = {
-        containers = [{
-          image = var.cmp_container_image
-        }]
-        restartPolicy = "Always"
-      }
-    })
-
-    # metadata_startup_script = file("${path.module}/scripts/gcp_operator.sh")
-  
-  }
-  
-  service_account {
-    email  = var.gcp_acc_email_1
-    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
-  }
-
-  tags = ["http-server", "https-server", "allow-ssh"]
-
 }
 
-// -------------------------------------------------------------------------------- FIREWALL --- //
-// -------------------------------------------------------------------------------- -------- --- //
+# EC2 Instance
+resource "aws_instance" "data_pipeline" {
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = var.instance_type
+  key_name              = aws_key_pair.deployer.key_name
+  vpc_security_group_ids = [aws_security_group.data_pipeline_sg.id]
+  subnet_id             = aws_subnet.public.id
 
-resource "google_compute_firewall" "allow_ssh" {
-
-  name    = "allow-ssh"
-  network = "default"
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22", "8080", "80", "443", "5432"] # ssh, torch, http, https, postgresql
+  # Add more storage for Docker containers and data
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 30
+    encrypted   = true
+    
+    tags = {
+      Name = "${var.project_name}-root-volume"
+    }
   }
 
-  source_ranges = ["0.0.0.0/0"]  # Allow from any IP, adjust as needed for security
-  target_tags   = ["allow-ssh"]
+  # User data script to setup Docker and services
+  user_data = file("userdata.sh")
 
+  tags = {
+    Name        = "${var.project_name}-instance"
+    Environment = var.environment
+    Purpose     = "Data Pipeline Infrastructure"
+  }
+
+  # Wait for instance to be ready
+  depends_on = [
+    aws_internet_gateway.main,
+    aws_route_table_association.public
+  ]
+}
+
+# Elastic IP for static public IP
+resource "aws_eip" "data_pipeline_eip" {
+  instance = aws_instance.data_pipeline.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "${var.project_name}-eip"
+  }
+
+  depends_on = [aws_internet_gateway.main]
 }
 
