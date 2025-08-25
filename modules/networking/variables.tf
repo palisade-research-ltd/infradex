@@ -1,45 +1,44 @@
 
-// --- ------------------------------------------------------------------- PROJECT VARIABLES --- //
-// --- ------------------------------------------------------------------- ----------------- --- //
-
-variable "prj_project_id" {
-  description = "The GCP project ID"
-  type        = string
+variable "pro_name" {
+  description = "Name of the project"
+  type = string
+  default = "infradex"
 }
 
-variable "prj_region" {
-  description = "The GCP region where resources will be created"
-  type        = string
+variable "pro_project_id" {
+  description = "Id of the project"
+  type = string
+  default = "infradex"
 }
 
-variable "prj_zone" {
-  description = "The GCP zone where resources will be created"
+variable "pro_environment" {
+  description = "Environment (dev, staging, prod)"
   type        = string
+  default     = "dev"
 }
 
-variable "prj_environment" {
-  description = "a Tag to identify different environments to deploy"
+variable "pro_region" {
+  description = "AWS region for resources"
   type        = string
+  default     = "us-west-2"
 }
 
-// --- -------------------------------------------------------------------- OUTPUT VARIABLES --- //
-// --- -------------------------------------------------------------------- ---------------- --- //
+variable "public_key" {
+  description = "Public key for EC2 key pair"
+  type        = string
+  # You'll need to provide this when running terraform apply
+  # Example: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."
+}
 
+variable "private_key_path" {
+  description = "Path to private key file for SSH access"
+  type        = string
+  default     = "~/.ssh/id_rsa"
+}
 
-
-// --- --------------------------------------------------------------------- LOCAL VARIABLES --- //
-// --- --------------------------------------------------------------------- --------------- --- //
-
-locals {
-  
-  apis = {
-    "cloud" = { url = "cloudresourcemanager" }
-    "iam" = { url = "iamcredentials" }
-    "networking" = { url = "servicenetworking" }
-    "services"  = { url = "serviceusage" }
-    "compute" = { url = "compute" }
-    "secrets" = { url = "secretmanager" }
-  }
-
+variable "instance_type" {
+  description = "compute instance type"
+  type = string
+  default = "infradex"
 }
 

@@ -1,72 +1,47 @@
 
-// --- ------------------------------------------------------------------- PROJECT VARIABLES --- //
-// --- ------------------------------------------------------------------- ----------------- --- //
+variable "pro_project_id" {
+  description = "Id of the project"
+  type        = string
+  default     = "infradex"
+}
 
-variable "prj_project_id" {
-  description = "The GCP project ID"
+variable "pro_environment" {
+  description = "Environment (dev, staging, prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "pro_region" {
+  description = "AWS region for resources"
+  type        = string
+  default     = "us-west-2"
+}
+
+variable "pro_name" {
+  description = "Name of the project"
+  type        = string
+  default     = "infradex"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.large"
+
+  validation {
+    condition     = can(regex("^[tm][0-9][a-z]?\\.", var.instance_type))
+    error_message = "Instance type must be a valid EC2 instance type."
+  }
+}
+
+variable "public_key" {
+  description = "Public key for EC2 key pair"
   type        = string
 }
 
-variable "prj_region" {
-  description = "The GCP region where resources will be created"
+variable "private_key_path" {
+  description = "Path to private key file for SSH access"
   type        = string
+  default     = "~/.ssh/id_rsa"
 }
-
-variable "prj_zone" {
-  description = "The GCP zone where resources will be created"
-  type        = string
-}
-
-variable "prj_environment" {
-  description = "a Tag to identify different environments to deploy"
-  type        = string
-}
-
-// --- -------------------------------------------------------------------- MODULE VARIABLES --- //
-// --- -------------------------------------------------------------------- ---------------- --- //
-
-variable "cmp_instance_type" {
-  type        = string
-  description = "The instance type for the server"
-  default     = "e2-small"
-}
-
-variable "cmp_instance_name" {
-  type        = string
-  description = "The instance name for the server"
-}
-
-variable "cmp_instance_image" {
-  type        = string
-  description = "The source image to use"
-}
-
-variable "cmp_container_image" {
-  type        = string
-  description = "The route of the container image to use into the compute resource"
-}
-
-// --- ------------------------------------------------------------------------- CREDENTIALS --- //
-// --- ------------------------------------------------------------------------- ----------- --- //
-
-variable "gcp_acc_email_1" {}
-variable "gcp_credentials" {}
-variable "TF_VAR_gcp_credentials" {}
-
-variable "gcp_ssh_usr_0" {}
-variable "gcp_ssh_pub_0" {}
-variable "gcp_ssh_prv_0" {}
-variable "TF_VAR_gcp_ssh_usr_0" {}
-variable "TF_VAR_gcp_ssh_pub_0" {}
-variable "TF_VAR_gcp_ssh_prv_0" {}
-
-variable "gcp_ssh_usr_1" {}
-variable "gcp_ssh_pub_1" {}
-variable "TF_VAR_gcp_ssh_usr_1" {}
-variable "TF_VAR_gcp_ssh_pub_1" {}
-
-variable "gcp_ssh_usr_2" {}
-variable "gcp_ssh_pub_2" {}
-variable "TF_VAR_gcp_ssh_usr_2" {}
-variable "TF_VAR_gcp_ssh_pub_2" {}
 
