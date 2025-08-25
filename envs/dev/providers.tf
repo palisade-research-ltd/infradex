@@ -3,9 +3,7 @@ terraform {
 
   cloud {
     organization = "palisade"
-    workspaces {
-      name = "infradex"
-    }
+    workspaces { name = "infradex" }
   }
 
   required_providers {
@@ -18,13 +16,4 @@ terraform {
   required_version = ">= 1.9"
 
 }
-
-provider "aws" {
-
-  project     = var.pro_project_id
-  region      = var.pro_region
-  credentials = var.aws_credentials
-
-}
-
 

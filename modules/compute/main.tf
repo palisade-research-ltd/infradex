@@ -1,6 +1,6 @@
 
-
 data "aws_ami" "amazon_linux" {
+
   most_recent = true
   owners      = ["amazon"]
 
@@ -13,9 +13,9 @@ data "aws_ami" "amazon_linux" {
     name   = "state"
     values = ["available"]
   }
+
 }
 
-# EC2 Instance
 resource "aws_instance" "data_pipeline" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
@@ -30,16 +30,16 @@ resource "aws_instance" "data_pipeline" {
     encrypted   = true
     
     tags = {
-      Name = "${var.project_name}-root-volume"
+      Name = "${var.pro_name}-root-volume"
     }
   }
 
   # User data script to setup Docker and services
-  user_data = file("userdata.sh")
+  user_data = file("../../scripts/userdata.sh")
 
   tags = {
-    Name        = "${var.project_name}-instance"
-    Environment = var.environment
+    Name        = "${var.pro_name}-instance"
+    Environment = var.pro_environment
     Purpose     = "Data Pipeline Infrastructure"
   }
 
@@ -50,13 +50,12 @@ resource "aws_instance" "data_pipeline" {
   ]
 }
 
-# Elastic IP for static public IP
 resource "aws_eip" "data_pipeline_eip" {
   instance = aws_instance.data_pipeline.id
   domain   = "vpc"
 
   tags = {
-    Name = "${var.project_name}-eip"
+    Name = "${var.pro_name}-eip"
   }
 
   depends_on = [aws_internet_gateway.main]

@@ -1,5 +1,6 @@
+
 resource "aws_security_group" "data_pipeline_sg" {
-  name        = "${var.project_name}-security-group"
+  name        = "${var.pro_name}-security-group"
   description = "Security group for data pipeline EC2 instance"
   vpc_id      = aws_vpc.main.id
 
@@ -75,13 +76,14 @@ resource "aws_security_group" "data_pipeline_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-sg"
+    Name = "${var.pro_name}-sg"
   }
 }
 
-# Key pair (you'll need to create this in AWS console or import your public key)
 resource "aws_key_pair" "deployer" {
-  key_name   = "${var.project_name}-key"
+
+  key_name   = "${var.pro_name}-key"
   public_key = var.public_key
+
 }
 

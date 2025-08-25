@@ -1,12 +1,29 @@
 
+data "aws_ami" "amazon_linux" {
+
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name        = "${var.project_name}-vpc"
-    Environment = var.environment
+    Name        = "${var.pro_name}-vpc"
+    Environment = var.pro_environment
   }
 }
 
@@ -14,7 +31,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "${var.project_name}-igw"
+    Name = "${var.pro_name}-igw"
   }
 }
 
@@ -25,7 +42,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-public-subnet"
+    Name = "${var.pro_name}-public-subnet"
   }
 }
 
@@ -42,7 +59,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.project_name}-public-rt"
+    Name = "${var.pro_name}-public-rt"
   }
 }
 
@@ -52,7 +69,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_security_group" "data_pipeline_sg" {
-  name        = "${var.project_name}-security-group"
+  name        = "${var.pro_name}-security-group"
   description = "Security group for data pipeline EC2 instance"
   vpc_id      = aws_vpc.main.id
 
@@ -128,12 +145,12 @@ resource "aws_security_group" "data_pipeline_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-sg"
+    Name = "${var.pro_name}-sg"
   }
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "${var.project_name}-key"
+  key_name   = "${var.pro_name}-key"
   public_key = var.public_key
 }
 
@@ -144,27 +161,25 @@ resource "aws_instance" "data_pipeline" {
   vpc_security_group_ids = [aws_security_group.data_pipeline_sg.id]
   subnet_id             = aws_subnet.public.id
 
-  # Add more storage for Docker containers and data
   root_block_device {
     volume_type = "gp3"
     volume_size = 30
     encrypted   = true
     
     tags = {
-      Name = "${var.project_name}-root-volume"
+      Name = "${var.pro_name}-root-volume"
     }
   }
 
   # User data script to setup Docker and services
-  user_data = file("userdata.sh")
+  user_data = file("../../scripts/userdata.sh")
 
   tags = {
-    Name        = "${var.project_name}-instance"
-    Environment = var.environment
+    Name        = "${var.pro_name}-instance"
+    Environment = var.pro_environment
     Purpose     = "Data Pipeline Infrastructure"
   }
 
-  # Wait for instance to be ready
   depends_on = [
     aws_internet_gateway.main,
     aws_route_table_association.public
@@ -176,7 +191,7 @@ resource "aws_eip" "data_pipeline_eip" {
   domain   = "vpc"
 
   tags = {
-    Name = "${var.project_name}-eip"
+    Name = "${var.pro_name}-eip"
   }
 
   depends_on = [aws_internet_gateway.main]
