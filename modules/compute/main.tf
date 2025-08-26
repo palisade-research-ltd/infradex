@@ -42,12 +42,6 @@ resource "aws_instance" "data_pipeline" {
     Purpose     = "Data Pipeline Infrastructure"
   }
 
-  # Wait for instance to be ready
-  # depends_on = [
-  #   aws_internet_gateway.main,
-  #   aws_route_table_association.public
-  # ]
-
 }
 
 resource "aws_eip" "data_pipeline_eip" {
@@ -58,13 +52,5 @@ resource "aws_eip" "data_pipeline_eip" {
     Name = "${var.pro_id}-eip"
   }
 
-  # depends_on = [aws_internet_gateway.main]
-
 }
-
-# resource "aws_key_pair" "deployer" {
-#   key_name   = "${var.pro_name}-key-pair"
-#   public_key = var.public_key
-# }
-#
 

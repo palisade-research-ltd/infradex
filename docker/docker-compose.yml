@@ -1,8 +1,8 @@
 services:
-  clickhouse:
+  database:
       build:
         context: .
-        dockerfile: clickhouse.Dockerfile
+        dockerfile: database.Dockerfile
       ports:
         - "8123:8123"
         - "9000:9000"
