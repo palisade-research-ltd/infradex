@@ -5,8 +5,8 @@ variable "pro_region" {
   default     = "us-west-2"
 }
 
-variable "pro_name" {
-  description = "Name of the project"
+variable "pro_id" {
+  description = "ID of the project"
   type        = string
   default     = "infradex"
 }
@@ -20,11 +20,31 @@ variable "pro_environment" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.large"
+  default     = "t3.micro"
   
   validation {
     condition = can(regex("^[tm][0-9][a-z]?\\.", var.instance_type))
     error_message = "Instance type must be a valid EC2 instance type."
   }
+}
+
+variable "public_key" {
+  description = "AWS Access Key"
+  type        = string
+}
+
+variable "private_key_path" {
+  description = "The path to the private key"
+  type        = string
+}
+
+variable "security_group" {
+  description = "Security group to operate within"
+  type        = set(string)
+}
+
+variable "subnet_id" {
+  description = "Subnet id to operate within"
+  type        = string
 }
 

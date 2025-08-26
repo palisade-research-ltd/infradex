@@ -1,4 +1,3 @@
-
 data "aws_ami" "amazon_linux" {
 
   most_recent = true
@@ -18,10 +17,10 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_instance" "data_pipeline" {
   ami                    = data.aws_ami.amazon_linux.id
+  key_name               = "${var.pro_id}-key-pair"
   instance_type          = var.instance_type
-  key_name              = aws_key_pair.deployer.key_name
-  vpc_security_group_ids = [aws_security_group.data_pipeline_sg.id]
-  subnet_id             = aws_subnet.public.id
+  vpc_security_group_ids = var.security_group
+  subnet_id              = var.subnet_id
 
   # Add more storage for Docker containers and data
   root_block_device {
@@ -30,7 +29,7 @@ resource "aws_instance" "data_pipeline" {
     encrypted   = true
     
     tags = {
-      Name = "${var.pro_name}-root-volume"
+      Name = "${var.pro_id}-root-volume"
     }
   }
 
@@ -38,16 +37,11 @@ resource "aws_instance" "data_pipeline" {
   user_data = file("../../scripts/userdata.sh")
 
   tags = {
-    Name        = "${var.pro_name}-instance"
+    Name        = "${var.pro_id}-instance"
     Environment = var.pro_environment
     Purpose     = "Data Pipeline Infrastructure"
   }
 
-  # Wait for instance to be ready
-  depends_on = [
-    aws_internet_gateway.main,
-    aws_route_table_association.public
-  ]
 }
 
 resource "aws_eip" "data_pipeline_eip" {
@@ -55,9 +49,8 @@ resource "aws_eip" "data_pipeline_eip" {
   domain   = "vpc"
 
   tags = {
-    Name = "${var.pro_name}-eip"
+    Name = "${var.pro_id}-eip"
   }
 
-  depends_on = [aws_internet_gateway.main]
 }
 

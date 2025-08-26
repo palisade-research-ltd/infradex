@@ -29,3 +29,8 @@ output "ssh_command" {
   value       = "ssh -i ${var.private_key_path} ec2-user@${aws_eip.data_pipeline_eip.public_ip}"
 }
 
+output "aws_eip" {
+  description = ""
+  value       = ""
+}
+
