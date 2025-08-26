@@ -95,10 +95,10 @@ plan_terraform() {
     
     # Create terraform.tfvars file
     cat > terraform.tfvars <<EOF
-aws_region = "us-west-2"
+aws_region = "us-east-1"
 project_name = "data-pipeline"
 environment = "dev"
-instance_type = "t3.large"
+instance_type = "t3.micro"
 public_key = "${public_key}"
 private_key_path = "${ssh_key_path}"
 EOF
