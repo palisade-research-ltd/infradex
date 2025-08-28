@@ -17,11 +17,6 @@ variable "pro_region" {
   default     = "us-west-2"
 }
 
-variable "public_key" {
-  description = "Public key for EC2 key pair"
-  type        = string
-}
-
 variable "private_key_path" {
   description = "Path to private key file for SSH access"
   type        = string

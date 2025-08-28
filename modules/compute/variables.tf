@@ -28,16 +28,6 @@ variable "instance_type" {
   }
 }
 
-variable "public_key" {
-  description = "AWS Access Key"
-  type        = string
-}
-
-variable "private_key_path" {
-  description = "The path to the private key"
-  type        = string
-}
-
 variable "security_group" {
   description = "Security group to operate within"
   type        = set(string)
@@ -46,5 +36,11 @@ variable "security_group" {
 variable "subnet_id" {
   description = "Subnet id to operate within"
   type        = string
+}
+
+variable "private_key_path" {
+  description = "Path to private key file for SSH access"
+  type        = string
+  default     = "~/.ssh/id_rsa"
 }
 
