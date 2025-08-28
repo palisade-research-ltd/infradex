@@ -1,3 +1,7 @@
+
+# --- ------------------------------------------------------- DATA: AMI for the EC2 --- #
+# --- ------------------------------------------------------- --------------------- --- #
+
 data "aws_ami" "amazon_linux" {
 
   most_recent = true
@@ -20,11 +24,14 @@ data "aws_ami" "amazon_linux" {
 
 }
 
+# --- --------------------------------------------------------------- RESOURCE: EC2 --- #
+# --- --------------------------------------------------------------- ------------- --- #
+
 resource "aws_instance" "data_pipeline" {
+
   ami                    = data.aws_ami.amazon_linux.id
   key_name               = "${var.pro_id}-key-pair"
   instance_type          = var.instance_type
-
   vpc_security_group_ids = var.security_group
   subnet_id              = var.subnet_id
 
@@ -39,11 +46,6 @@ resource "aws_instance" "data_pipeline" {
     }
   }
 
-  # User data script for Docker setup
-  user_data = base64encode(templatefile("${path.module}/../../scripts/userdata.sh", {
-    project_name = var.pro_id
-  }))
-
   tags = {
     Name        = "${var.pro_id}-instance"
     Environment = var.pro_environment
@@ -53,18 +55,26 @@ resource "aws_instance" "data_pipeline" {
 
 }
 
-  resource "aws_eip" "data_pipeline_eip" {
-    instance = aws_instance.data_pipeline.id
-    domain   = "vpc"
+# --- ------------------------------------------------------------ RESOURCE: EC2 IP --- #
+# --- ------------------------------------------------------------- --------------- --- #
 
-    tags = {
-      Name = "${var.pro_id}-eip"
-    }
+resource "aws_eip" "data_pipeline_eip" {
+
+  instance = aws_instance.data_pipeline.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "${var.pro_id}-eip"
+  }
 
 }
 
-# Provisioning Docker files after instance creation
+
+# --- -------------------------------------------- RESOURCE: DOCKER FILES PROVISION --- #
+# --- -------------------------------------------- -------------------------------- --- #
+
 resource "null_resource" "deploy_docker_files" {
+
   depends_on = [aws_instance.data_pipeline]
 
   connection {
@@ -81,6 +91,12 @@ resource "null_resource" "deploy_docker_files" {
       "sudo mkdir -p /opt/infradex/docker",
       "sudo chown -R ec2-user:ec2-user /opt/infradex"
     ]
+  }
+
+  # Copy Database Config Files
+  provisioner "file" {
+    source      = "${path.module}/../../database/config/"
+    destination = "/opt/infradex/docker/"
   }
 
   # Copy Docker files
@@ -106,6 +122,6 @@ resource "null_resource" "deploy_docker_files" {
       "sudo docker ps"  # Show running containers
     ]
   }
-}
 
+}
 
