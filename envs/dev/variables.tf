@@ -17,13 +17,6 @@ variable "pro_region" {
   default     = "us-east-1"
 }
 
-variable "private_key_path" {
-  description = "Path to private key file for SSH access"
-  type        = string
-  default     = "/Users/franciscome/git/palisade/infradex-key-pair.pem" #"~/.ssh/id_rsa"
-
-}
-
 variable "instance_type" {
   description = ""
   type        = string

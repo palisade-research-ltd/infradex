@@ -11,15 +11,3 @@ variable "pro_environment" {
   default     = "dev"
 }
 
-variable "pro_region" {
-  description = "AWS region for resources"
-  type        = string
-  default     = "us-west-2"
-}
-
-variable "private_key_path" {
-  description = "Path to private key file for SSH access"
-  type        = string
-  default     = "~/.ssh/id_rsa"
-}
-

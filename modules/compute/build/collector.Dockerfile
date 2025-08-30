@@ -18,9 +18,9 @@ RUN apt-get update && apt-get install -y \
 RUN USER=root cargo new --bin collector
 WORKDIR /app/collector
 
-# # Copy manifests for dependency caching
-# COPY Cargo.lock ./Cargo.lock
-# COPY Cargo.toml ./Cargo.toml
+# Copy manifests for dependency caching
+COPY Cargo.lock ./Cargo.lock
+COPY Cargo.toml ./Cargo.toml
 
 # Build dependencies (this layer will be cached)
 RUN cargo build --release && rm src/*.rs target/release/deps/collector*
