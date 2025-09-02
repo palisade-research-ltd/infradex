@@ -45,3 +45,25 @@ aws ec2 create-key-pair \
 chmod 400 infradex-key-pair.pem
 ```
 
+## Check DB
+
+If `security group allows connection attemps from outside and/or from the IP where these would be run.
+
+Ports open
+
+```shell
+netstat -tulpn | grep -E ":(8123|9000)"
+```
+
+HTTP Interface
+
+```shell
+curl http://EC2_PUBLIC_IP:8123/ping
+```
+
+Test a query
+
+```shell
+curl 'http://EC2_PUBLIC_IP:8123/?query=SELECT%201'
+```
+

@@ -5,8 +5,3 @@ variable "pro_id" {
   default = "infradex"
 }
 
-variable "deployment_files_id" {}
-variable "collector_build_id" {}
-variable "collector_configs_id" {}
-variable "collector_scripts_id" {}
-

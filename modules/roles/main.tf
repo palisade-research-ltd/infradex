@@ -26,24 +26,42 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
   name = "${var.pro_id}-ec2-s3-policy"
   role = aws_iam_role.ec2_s3_access.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          var.deployment_files_id,
-          var.collector_build_id,
-          var.collector_configs_id,
-          var.collector_scripts_id
-        ]
-      }
-    ]
-  })
+   policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:ListAllMyBuckets",
+            "s3:GetBucketLocation",
+            "ec2:DescribeInstances",
+          ]
+          Resource = "*"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:ListBucket",
+            "s3:GetObject",
+            "s3:GetObjectVersion"
+          ]
+          Resource = [
+            "arn:aws:s3:::*",
+            "arn:aws:s3:::*/*"
+          ]
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "iam:ListUsers",
+          ]
+          Resource = [
+            "arn:aws:iam:::*"
+          ]
+        }
+      ]
+    })
+
 }
 
 # --- INSTANCE PROFILE EC2 --- #

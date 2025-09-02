@@ -38,3 +38,13 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "key_pair_name" {
+  description = "Key pair name to be used"
+  type        = string
+}
+
+variable "ec2_profile" {
+  description = "aws_iam_profile"
+  type        = string
+}
+

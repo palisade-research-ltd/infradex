@@ -6,11 +6,11 @@
 resource "aws_s3_bucket" "s3_deployment_files" {
 
   bucket = "${var.pro_id}-datalake-deployment-files"
-  
   tags = {
     Name        = "${var.pro_id}-datalake-deployment-files"
     Environment = var.pro_environment
   }
+
 }
 
 # --- Configure bucket versioning
@@ -127,49 +127,26 @@ resource "aws_instance" "data_collector" {
 
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
+  key_name               = var.key_pair_name
   vpc_security_group_ids = var.security_group
   subnet_id              = var.subnet_id
+  iam_instance_profile   = var.ec2_profile
 
-  # User data script to download and deploy files
+  # --- USER DATA --- #
+
+  # Combine the static script with environment variables
   user_data_base64 = base64encode(<<-EOF
     #!/bin/bash
-    yum update -y
-    yum install -y aws-cli docker docker-compose-plugin
     
-    # Start Docker service
-    systemctl start docker
-    systemctl enable docker
-    usermod -a -G docker ec2-user
+    # Set environment variables for the script
+    export S3_BUCKET_NAME="${aws_s3_bucket.s3_deployment_files.id}"
+    export PROJECT_ID="${var.pro_id}"
+    export AWS_REGION="${var.pro_region}"
     
-    # Create directory structure
-    mkdir -p created_test_dir 
-    mkdir -p /opt/infradex/database
-    mkdir -p /opt/infradex/database/build
-    mkdir -p /opt/infradex/database/configs
-    mkdir -p /opt/infradex/database/scripts
-    
-    # Log completion
-    echo "Deployment completed successfully at $(date)" > /var/log/deployment.log
-
-    # Download files from S3
-    aws s3 sync s3://${aws_s3_bucket.s3_deployment_files.id}/database/build/ /opt/infradex/database/build/
-    aws s3 sync s3://${aws_s3_bucket.s3_deployment_files.id}/database/configs/ /opt/infradex/database/configs/
-    aws s3 sync s3://${aws_s3_bucket.s3_deployment_files.id}/database/scripts/ /opt/infradex/database/scripts/
-    
-    # Set permissions
-    chown -R ec2-user:ec2-user /opt/infradex
-    chmod +x /opt/infradex/database/scripts/*.sh
-    
-    # Navigate to database directory and start services
-    cd /opt/infradex/database
-    sudo -u ec2-user docker compose up -d database
-    
-    # Wait for services to start and show status
-    sleep 30
-    docker ps
-    
-    # Log completion
-    echo "Deployment completed successfully at $(date)" > /var/log/deployment.log
+    # Download and execute the static script
+    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/scripts/initial_setup.sh /tmp/initial_setup.sh
+    chmod +x /tmp/initial_setup.sh
+    /tmp/initial_setup.sh
     EOF
   )
 

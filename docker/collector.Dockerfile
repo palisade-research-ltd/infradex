@@ -50,7 +50,7 @@ RUN mkdir -p /app/logs /app/data /app/config && \
     chown -R appuser:appuser /app
 
 # Copy the binary from builder stage
-COPY --from=builder /app/collector/target/release/collector /usr/local/bin/collector
+COPY /collector /usr/local/bin/collector
 RUN chmod +x /usr/local/bin/collector
 
 # Copy configuration files
