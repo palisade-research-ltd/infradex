@@ -1,10 +1,9 @@
 #!/bin/bash
-set -e
 
 # Read environment variables set by user_data
-S3_BUCKET_NAME=${S3_BUCKET_NAME:-"default-bucket-name"}
-PROJECT_ID=${PROJECT_ID:-"infradex"}
-AWS_REGION=${AWS_REGION:-"us-east-1"}
+export S3_BUCKET_NAME=${S3_BUCKET_NAME:-"infradex-datalake-deployment-files"}
+export PROJECT_ID=${PROJECT_ID:-"infradex"}
+export AWS_REGION=${AWS_REGION:-"us-east-1"}
 
 # Redirect all output to log file  
 exec > >(tee /var/log/database-deployment.log) 2>&1
@@ -17,7 +16,7 @@ echo "AWS Region: $AWS_REGION"
 # Update system
 echo "Updating system packages..."
 yum update -y
-yum install -y aws-cli docker docker-compose-plugin git
+yum install -y aws-cli docker git
 
 # Configure AWS CLI region
 aws configure set default.region $AWS_REGION
@@ -55,23 +54,22 @@ echo "Files downloaded successfully"
 echo "Setting permissions..."
 chown -R ec2-user:ec2-user /opt/infradex
 chmod +x /opt/infradex/database/scripts/*.sh
+chmod +x /opt/infradex/database/configs/*.xml
 
 # Build Docker image
 echo "Building database Docker image..."
-cd /opt/infradex/database
 
-if [ -f "build/database.Dockerfile" ]; then
-  docker build -f build/database.Dockerfile -t $PROJECT_ID-database:latest . || exit 1
+if [ -f "opt/infradex/database/build/database.Dockerfile" ]; then
+  docker build -f opt/infradex/database/build/database.Dockerfile -t database . || exit 1
   echo "Database Docker image built successfully"
   
   # Run container
   echo "Starting database container..."
   docker run -d \
-    --name $PROJECT_ID-clickhouse \
+    --name database-clickhouse \
     -p 8123:8123 \
     -p 9000:9000 \
-    --restart unless-stopped \
-    $PROJECT_ID-database:latest || exit 1
+    database:latest
     
   echo "Database container started successfully"
 else

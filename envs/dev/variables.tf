@@ -32,4 +32,7 @@ variable "key_pair_name" {
 variable "bybit_account_no_01" {}
 variable "bybit_access_key_01" {}
 variable "bybit_secret_key_01" {}
+# variable "TF_VAR_AWS_REGION" {}
+# variable "TF_VAR_AWS_ACCESS_KEY_ID" {}
+# variable "TF_VAR_AWS_SECRET_ACCESS_KEY" {}
 

@@ -126,27 +126,24 @@ data "aws_ami" "amazon_linux" {
 resource "aws_instance" "data_collector" {
 
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
   key_name               = var.key_pair_name
+  instance_type          = var.instance_type
   vpc_security_group_ids = var.security_group
   subnet_id              = var.subnet_id
   iam_instance_profile   = var.ec2_profile
 
-  # --- USER DATA --- #
+  # --- Execute initial_setup --- #
 
-  # Combine the static script with environment variables
   user_data_base64 = base64encode(<<-EOF
     #!/bin/bash
     
-    # Set environment variables for the script
-    export S3_BUCKET_NAME="${aws_s3_bucket.s3_deployment_files.id}"
-    export PROJECT_ID="${var.pro_id}"
-    export AWS_REGION="${var.pro_region}"
-    
     # Download and execute the static script
-    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/scripts/initial_setup.sh /tmp/initial_setup.sh
+    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/database/scripts/initial_setup.sh /tmp/initial_setup.sh
     chmod +x /tmp/initial_setup.sh
+    
+    # Execute with explicit environment variables
     /tmp/initial_setup.sh
+
     EOF
   )
 
@@ -156,7 +153,7 @@ resource "aws_instance" "data_collector" {
     encrypted   = true
     
     tags = {
-      Name        = "${var.pro_id}-root-volume"
+      Name        = "${var.pro_id}-datalake-root-volume"
       Environment = var.pro_environment
       Project     = var.pro_id
     }
@@ -166,7 +163,7 @@ resource "aws_instance" "data_collector" {
     Name        = "${var.pro_id}-data-instance"
     Environment = var.pro_environment
     Project     = var.pro_id
-    Purpose     = "CEX Trading Data Pipeline"
+    Purpose     = "Create, Launch and Host datalake datasets and compute"
   }
 
 }

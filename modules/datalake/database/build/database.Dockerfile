@@ -41,13 +41,9 @@ COPY opt/infradex/database/scripts/entrypoint.sh /custom-entrypoint.sh
 RUN chmod +x /custom-entrypoint.sh && \
     chown clickhouse:clickhouse /custom-entrypoint.sh
 
-# Health check with better validation
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
-    CMD wget --spider -q http://localhost:8123/ping && \
-        clickhouse-client --query "SELECT 1" || exit 1
-
 # Expose standard ClickHouse ports
 EXPOSE 8123 9000 9009
 
 # Use custom entrypoint
 ENTRYPOINT ["/custom-entrypoint.sh"]
+

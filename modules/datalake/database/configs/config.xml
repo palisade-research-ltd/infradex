@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <clickhouse>
     <!-- Network Configuration -->
-    <listen_host>::</listen_host>
+    <listen_host>0.0.0.0</listen_host>
     <http_port>8123</http_port>
     <tcp_port>9000</tcp_port>
     <max_connections>10000</max_connections>
@@ -44,27 +44,4 @@
         <max_suspicious_broken_parts>5</max_suspicious_broken_parts>
     </merge_tree>
     
-    <!-- Security Settings -->
-    <openSSL>
-        <server>
-            <certificateFile>/etc/clickhouse-server/server.crt</certificateFile>
-            <privateKeyFile>/etc/clickhouse-server/server.key</privateKeyFile>
-            <dhParamsFile>/etc/clickhouse-server/dhparam.pem</dhParamsFile>
-            <verificationMode>none</verificationMode>
-            <loadDefaultCAFile>true</loadDefaultCAFile>
-            <cacheSessions>true</cacheSessions>
-            <disableProtocols>sslv2,sslv3</disableProtocols>
-            <preferServerCiphers>true</preferServerCiphers>
-        </server>
-        <client>
-            <loadDefaultCAFile>true</loadDefaultCAFile>
-            <cacheSessions>true</cacheSessions>
-            <disableProtocols>sslv2,sslv3</disableProtocols>
-            <preferServerCiphers>true</preferServerCiphers>
-            <verificationMode>none</verificationMode>
-            <invalidCertificateHandler>
-                <name>AcceptCertificateHandler</name>
-            </invalidCertificateHandler>
-        </client>
-    </openSSL>
 </clickhouse>

@@ -42,12 +42,14 @@ resource "aws_instance" "features_compute" {
     encrypted   = true
     
     tags = {
-      Name = "${var.pro_id}-root-volume"
+      Name = "${var.pro_id}-features-root-volume"
+      Environment = var.pro_environment
+      Project     = var.pro_id
     }
   }
 
   tags = {
-    Name        = "${var.pro_id}-compute-instance"
+    Name        = "${var.pro_id}-features-compute"
     Environment = var.pro_environment
     Project     = var.pro_id
     Purpose     = "Compute features and models inference"
@@ -65,6 +67,8 @@ resource "aws_eip" "features_compute_eip" {
 
   tags = {
     Name = "${var.pro_id}-compute-eip"
+    Environment = var.pro_environment
+    Project     = var.pro_id
   }
 
 }

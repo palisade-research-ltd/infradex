@@ -1,3 +1,4 @@
+
 # --------------------------------------------------------------------- IAM for EC2 --- #
 # --------------------------------------------------------------------- ----------- --- #
 
@@ -34,6 +35,7 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
           Action = [
             "s3:ListAllMyBuckets",
             "s3:GetBucketLocation",
+            "s3:ListObjectsV2",
             "ec2:DescribeInstances",
           ]
           Resource = "*"
