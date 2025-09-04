@@ -1,13 +1,118 @@
 
+# --- ------------------------------------------------------- DATA: AMI for the EC2 --- #
+# --- ------------------------------------------------------- --------------------- --- #
+
+data "aws_ami" "amazon_linux" {
+
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+
+}
+
+# --- --------------------------------------------------------------- RESOURCE: EC2 --- #
+# --- --------------------------------------------------------------- ------------- --- #
+
+resource "aws_instance" "data_lake" {
+
+  ami                    = data.aws_ami.amazon_linux.id
+  key_name               = var.key_pair_name
+  instance_type          = var.instance_type
+  vpc_security_group_ids = var.security_group
+  subnet_id              = var.subnet_id
+  iam_instance_profile   = var.ec2_profile
+
+  # --- Execute initial_setup --- #
+
+  user_data_base64 = base64encode(<<-EOF
+    #!/bin/bash
+    set -e
+
+    # Set environment variables for scripts
+    export S3_BUCKET_NAME="${aws_s3_bucket.s3_deployment_files.id}"
+    export PROJECT_ID="${var.pro_id}"
+    export AWS_REGION="${var.pro_region}"
+
+    # Log everything
+    exec > >(tee /var/log/deployment.log) 2>&1
+    
+    # Download and execute the static script
+    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/database/scripts/initial_setup.sh /tmp/initial_setup.sh
+    chmod +x /tmp/initial_setup.sh
+    
+    # Execute with explicit environment variables
+    /tmp/initial_setup.sh
+
+    # Download and execute the Collector script
+    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/collector/scripts/collector_setup.sh /tmp/collector_setup.sh
+    chmod +x /tmp/collector_setup.sh
+    
+    # Execute with explicit environment variables
+    /tmp/collector_setup.sh
+
+    EOF
+  )
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 30
+    encrypted   = true
+    
+    tags = {
+      Name        = "${var.pro_id}-dataplatform-root-volume"
+      Environment = var.pro_environment
+      Project     = var.pro_id
+    }
+  }
+
+  tags = {
+    Name        = "${var.pro_id}-data-instance"
+    Environment = var.pro_environment
+    Project     = var.pro_id
+    Purpose     = "Create, Launch and Host dataplatform datasets and compute"
+  }
+
+}
+
+# --- ------------------------------------------------------------ RESOURCE: EC2 IP --- #
+# --- ------------------------------------------------------------- --------------- --- #
+
+resource "aws_eip" "data_lake_eip" {
+
+  instance = aws_instance.data_lake.id
+  domain   = "vpc"
+
+  tags = {
+    Name        = "${var.pro_id}-data-eip"
+    Environment = var.pro_environment
+    Project     = var.pro_id
+  }
+
+}
+
 # --- -------------------------------------------- RESOURCE: DOCKER FILES PROVISION --- #
 # --- -------------------------------------------- -------------------------------- --- #
 
 # --- Create S3 bucket for file storage
 resource "aws_s3_bucket" "s3_deployment_files" {
 
-  bucket = "${var.pro_id}-datalake-deployment-files"
+  bucket = "${var.pro_id}-dataplatform-deployment-files"
   tags = {
-    Name        = "${var.pro_id}-datalake-deployment-files"
+    Name        = "${var.pro_id}-dataplatform-deployment-files"
     Environment = var.pro_environment
   }
 
@@ -94,93 +199,3 @@ resource "aws_s3_object" "database_scripts" {
   etag   = filemd5("${path.module}/database/scripts/${each.value}")
 
 }
-
-# --- ------------------------------------------------------- DATA: AMI for the EC2 --- #
-# --- ------------------------------------------------------- --------------------- --- #
-
-data "aws_ami" "amazon_linux" {
-
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-
-}
-
-# --- --------------------------------------------------------------- RESOURCE: EC2 --- #
-# --- --------------------------------------------------------------- ------------- --- #
-
-resource "aws_instance" "data_collector" {
-
-  ami                    = data.aws_ami.amazon_linux.id
-  key_name               = var.key_pair_name
-  instance_type          = var.instance_type
-  vpc_security_group_ids = var.security_group
-  subnet_id              = var.subnet_id
-  iam_instance_profile   = var.ec2_profile
-
-  # --- Execute initial_setup --- #
-
-  user_data_base64 = base64encode(<<-EOF
-    #!/bin/bash
-    
-    # Download and execute the static script
-    aws s3 cp s3://${aws_s3_bucket.s3_deployment_files.id}/database/scripts/initial_setup.sh /tmp/initial_setup.sh
-    chmod +x /tmp/initial_setup.sh
-    
-    # Execute with explicit environment variables
-    /tmp/initial_setup.sh
-
-    EOF
-  )
-
-  root_block_device {
-    volume_type = "gp3"
-    volume_size = 30
-    encrypted   = true
-    
-    tags = {
-      Name        = "${var.pro_id}-datalake-root-volume"
-      Environment = var.pro_environment
-      Project     = var.pro_id
-    }
-  }
-
-  tags = {
-    Name        = "${var.pro_id}-data-instance"
-    Environment = var.pro_environment
-    Project     = var.pro_id
-    Purpose     = "Create, Launch and Host datalake datasets and compute"
-  }
-
-}
-
-# --- ------------------------------------------------------------ RESOURCE: EC2 IP --- #
-# --- ------------------------------------------------------------- --------------- --- #
-
-resource "aws_eip" "data_collector_eip" {
-
-  instance = aws_instance.data_collector.id
-  domain   = "vpc"
-
-  tags = {
-    Name        = "${var.pro_id}-data-eip"
-    Environment = var.pro_environment
-    Project     = var.pro_id
-  }
-
-}
-

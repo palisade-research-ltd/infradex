@@ -23,7 +23,7 @@
 - `infradex`: All the cloud infrastructure definition.
     - Description: AWS Cloud infrastructure for compute, and data layers.
     - Primarily Terraform for AWS, SQL, shell scripts, docker.
-    - Hosted microservices: Infrastructure, Data-Lake, Data-Warehouse.
+    - Hosted microservices: Infrastructure, Data-Platform, Data-Warehouse.
 
 - `interdex`: Inter exchange connectivity.
     - Description: CEX and DEX programmatic integrations.

@@ -6,11 +6,11 @@ CREATE DATABASE IF NOT EXISTS operations;
 USE operations;
 
 -- Signals table (from the signals service)
-CREATE TABLE IF NOT EXISTS trading_signals (
+CREATE TABLE IF NOT EXISTS signals (
     ts DateTime64(6, 'UTC'),
     signal_id String,
     symbol String,
-    signal_type Enum8('buy' = 1, 'sell' = 2, 'hold' = 3),
+    signal_type Enum8('buy' = 1, 'sell' = 2),
     strength Float64,
     confidence Float64,
     source String

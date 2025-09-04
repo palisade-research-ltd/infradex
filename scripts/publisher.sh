@@ -6,7 +6,7 @@
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
 # Configuration - Edit these variables as needed
-DOCKERFILE_NAME="datalake.Dockerfile"
+DOCKERFILE_NAME="dataplatform.Dockerfile"
 DOCKER_USERNAME="${DOCKER_USERNAME:-}"
 DOCKER_PAT="${DOCKER_PAT:-}"
 DOCKER_REPO="${DOCKER_REPO:-$DOCKER_USERNAME}"

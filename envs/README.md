@@ -5,10 +5,10 @@
 - `prd`: Production ready. 
 
 
-## datalake
+## dataplatform
 
-In `datalake/scripts/publisher.sh` is contained the script to build and publish the 
-`docker/datalake.Dockerfile`.
+In `dataplatform/scripts/publisher.sh` is contained the script to build and publish the 
+`docker/dataplatform.Dockerfile`.
 
 ```shell
 export DOCKER_USERNAME="dockerhub-username"

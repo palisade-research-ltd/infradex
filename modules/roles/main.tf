@@ -45,7 +45,8 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
           Action = [
             "s3:ListBucket",
             "s3:GetObject",
-            "s3:GetObjectVersion"
+            "s3:GetOjbectTagging",
+            "s3:GetObjectVersion",
           ]
           Resource = [
             "arn:aws:s3:::*",

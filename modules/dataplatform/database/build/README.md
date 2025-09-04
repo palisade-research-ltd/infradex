@@ -12,4 +12,3 @@
 - Orderbook Snapshots (mv_ob_x_t)
 - PublicTrades OHLC (mv_pt_ohlc_x_t)
 
-

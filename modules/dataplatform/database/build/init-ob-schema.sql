@@ -5,7 +5,7 @@ CREATE DATABASE IF NOT EXISTS operations;
 -- Use the trading database
 USE operations;
 
--- Orderbooks table (FIXED: added semicolon)
+-- Orderbooks table
 CREATE TABLE IF NOT EXISTS orderbooks (
     ts DateTime64(6, 'UTC'),
     symbol String,

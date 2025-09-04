@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Read environment variables set by user_data
-export S3_BUCKET_NAME=${S3_BUCKET_NAME:-"infradex-datalake-deployment-files"}
-export PROJECT_ID=${PROJECT_ID:-"infradex"}
-export AWS_REGION=${AWS_REGION:-"us-east-1"}
+export S3_BUCKET_NAME="infradex-dataplatform-deployment-files"
+export PROJECT_ID="infradex"
+export AWS_REGION="us-east-1"
 
 # Redirect all output to log file  
 exec > >(tee /var/log/database-deployment.log) 2>&1

@@ -2,12 +2,12 @@
 # Configuration for the CEX data collector
 
 [collector]
-name = "infradex_collector"
+name = "data_collector"
 log_level = "info"
 
 [database]
-clickhouse_url = "http://database:8123"
-database_name = "trading_data"
+clickhouse_url = "http://localhost:8123"
+database_name = "operations"
 batch_size = 1000
 flush_interval_seconds = 30
 

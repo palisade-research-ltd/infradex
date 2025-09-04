@@ -19,8 +19,8 @@ module "compute" {
   depends_on     = [module.networking]
 }
 
-module "datalake" {
-  source         = "../../modules/datalake"
+module "dataplatform" {
+  source         = "../../modules/dataplatform"
   subnet_id      = module.networking.aws_subnet_id
   security_group = module.networking.aws_security_group_id
   key_pair_name  = var.key_pair_name

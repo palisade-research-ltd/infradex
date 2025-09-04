@@ -1,4 +1,4 @@
-# File: datalake/database/build/database.Dockerfile
+# File: dataplatform/database/build/database.Dockerfile
 # Enhanced Clickhouse database setup for CEX Trading Data
 
 # Base image
@@ -16,6 +16,7 @@ RUN mkdir -p /var/lib/clickhouse/format_schemas && \
     mkdir -p /var/lib/clickhouse/data && \
     mkdir -p /var/lib/clickhouse/metadata && \
     mkdir -p /docker-entrypoint-initdb.d && \
+
     chown -R clickhouse:clickhouse /var/lib/clickhouse && \
     chown -R clickhouse:clickhouse /var/log/clickhouse-server
 
@@ -24,10 +25,10 @@ COPY opt/infradex/database/configs/config.xml /etc/clickhouse-server/config.d/co
 COPY opt/infradex/database/configs/users.xml /etc/clickhouse-server/users.d/users.xml
 
 # Copy initialization SQL scripts to the init directory (FIXED LOCATION)
-COPY opt/infradex/database/build/init-lq-schema.sql /docker-entrypoint-initdb.d/01-init-lq-schema.sql
-COPY opt/infradex/database/build/init-ob-schema.sql /docker-entrypoint-initdb.d/02-init-ob-schema.sql
-COPY opt/infradex/database/build/init-pt-schema.sql /docker-entrypoint-initdb.d/03-init-pt-schema.sql
-COPY opt/infradex/database/build/init-sn-schema.sql /docker-entrypoint-initdb.d/04-init-sn-schema.sql
+COPY opt/infradex/database/build/init-lq-schema.sql /docker-entrypoint-initdb.d/init-lq-schema.sql
+COPY opt/infradex/database/build/init-ob-schema.sql /docker-entrypoint-initdb.d/init-ob-schema.sql
+COPY opt/infradex/database/build/init-pt-schema.sql /docker-entrypoint-initdb.d/init-pt-schema.sql
+COPY opt/infradex/database/build/init-sn-schema.sql /docker-entrypoint-initdb.d/init-sn-schema.sql
 
 # Set proper permissions for all files
 RUN chown -R clickhouse:clickhouse /etc/clickhouse-server/ && \

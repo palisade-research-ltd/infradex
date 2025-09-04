@@ -39,13 +39,13 @@ aws ec2 create-key-pair \
     --output text > infradex-key-pair.pem
 ```
 
-...and then change the permissions on the fiel
+...and then change the permissions on the file
 
 ```shell
 chmod 400 infradex-key-pair.pem
 ```
 
-## Check DB
+## Connect to DB
 
 If `security group allows connection attemps from outside and/or from the IP where these would be run.
 
@@ -66,4 +66,33 @@ Test a query
 ```shell
 curl 'http://EC2_PUBLIC_IP:8123/?query=SELECT%201'
 ```
+
+## Launch Database
+
+Using AWS CLI, check for detected EC2 instances locally: 
+
+```shell
+aws ec2 describe-instances | grep "PublicIp"
+```
+
+chose from the ones that appear, and execute a connection with SSH.
+
+```shell
+ssh -i ~/.ssh/aws-keys/infradex-key.pem ec2-user@54.197.249.246
+```
+
+then, within the ec2, verify docker containers running. 
+
+```shell
+docker ps -a
+```
+
+Try testing connectivity with a ping using `curl http://localhost:8123/ping` which should output a plain `Ok.`
+
+## Connection using DBeaver
+
+- Host: use the public DNS `ec2-34-233-65-252.compute-1.amazonaws.com`
+- Port: `8123`
+- Database/Schema: `operations`
+- User: `default`
 
