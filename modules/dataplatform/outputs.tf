@@ -14,8 +14,3 @@ output "ml_model_api_url" {
   value       = "http://${aws_eip.data_lake_eip.public_ip}:5000"
 }
 
-output "data_pipeline_api_url" {
-  description = "Data Pipeline API URL"
-  value       = "http://${aws_eip.data_lake_eip.public_ip}:8080"
-}
-

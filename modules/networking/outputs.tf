@@ -1,7 +1,7 @@
 
 output "aws_security_group_id" {
   description = "ID for the security group"
-  value = [aws_security_group.data_pipeline_sg.id]
+  value = [aws_security_group.data_lake_sg.id]
 }
 
 output "aws_subnet_id" {

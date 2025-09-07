@@ -2,31 +2,31 @@
 variable "pro_id" {
   description = "Id of the project"
   type        = string
-  default     = "infradex"
 }
 
-variable "pro_environment" {
+variable "pro_env" {
   description = "Environment (dev, staging, prod)"
   type        = string
-  default     = "dev_infradex"
 }
 
 variable "pro_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-east-1"
 }
 
 variable "instance_type" {
   description = ""
   type        = string
-  default     = "t3.micro"
+}
+
+variable "instance_ami" {
+  description = "Amazon Machine Image (AMI) for the Ec2 instance of the datalake"
+  type        = string
 }
 
 variable "key_pair_name" {
   description = "key pair to connect to AWS, stored as terraform sensitive variable"
   type        = string
-  default     = "infradex-key.pem"
 }
 
 variable "bybit_account_no_01" {}

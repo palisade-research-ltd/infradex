@@ -89,7 +89,7 @@ services:
       - infradex-network
 
   # Rust Collector Service  
-  collector:
+  datacollector:
     build:
       context: .
       dockerfile: collector.Dockerfile

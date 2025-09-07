@@ -26,3 +26,21 @@ run the following command:
 ./publisher.sh
 ```
 
+## AMI 
+
+Look for images available in the `us-east-1` region, free AMI, compatible with free-tier EC2 in a t4g.small instance, with ubuntu and ARM64. 
+
+```shell
+aws ec2 describe-images 
+    --region us-east-1 \ 
+    --filters \
+        "Name=free-tier-eligible,Values=true" \
+        "Name=architecture,Values=arm64" \
+    --query 'sort_by(Images, &CreationDate)[].{Name: Name, ImageId: ImageId, CreationDate: CreationDate, Architecture: Architecture}' \
+    --output table
+```
+
+Options: 
+    ami-0b866f42728654749 - ubuntu 2204
+    ami-082089782931bef58 - ubuntu-2204-standard-arm64-1694819299
+

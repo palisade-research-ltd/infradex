@@ -65,7 +65,7 @@ deploy_infrastructure() {
     # Create terraform.tfvars
     cat > terraform.tfvars <<EOF
 pro_id = "infradex"
-pro_environment = "dev" 
+pro_env = "dev" 
 pro_region = "us-west-2"
 instance_type = "t3.micro"  # Free tier eligible
 public_key = "${public_key}"

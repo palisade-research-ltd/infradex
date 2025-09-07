@@ -2,30 +2,31 @@
 variable "pro_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-west-2"
 }
 
 variable "pro_id" {
   description = "ID of the project"
   type        = string
-  default     = "infradex"
 }
 
-variable "pro_environment" {
+variable "pro_env" {
   description = "Environment (dev, staging, prod)"
   type        = string
-  default     = "dev"
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
   
   validation {
     condition = can(regex("^[tm][0-9][a-z]?\\.", var.instance_type))
     error_message = "Instance type must be a valid EC2 instance type."
   }
+}
+
+variable "instance_ami" {
+  description = "Amazon Machine Image (AMI) for the Ec2 instance of the datalake"
+  type        = string
 }
 
 variable "security_group" {

@@ -10,7 +10,7 @@ resource "aws_vpc" "main" {
 
   tags = {
     Name        = "${var.pro_id}-vpc"
-    Environment = var.pro_environment
+    Environment = var.pro_env
   }
 }
 
@@ -51,9 +51,9 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_security_group" "data_pipeline_sg" {
+resource "aws_security_group" "data_lake_sg" {
   name        = "${var.pro_id}-security-group"
-  description = "Security group for data pipeline EC2 instance"
+  description = "Security group for datalake EC2 instance"
   vpc_id      = aws_vpc.main.id
 
   # SSH access
@@ -106,15 +106,6 @@ resource "aws_security_group" "data_pipeline_sg" {
     description = "ML Model API"
     from_port   = 5000
     to_port     = 5000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Data Pipeline API
-  ingress {
-    description = "Data Pipeline API"
-    from_port   = 8080
-    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

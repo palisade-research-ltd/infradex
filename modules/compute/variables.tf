@@ -2,25 +2,21 @@
 variable "pro_region" {
   description = "AWS region for resources"
   type        = string
-  default     = "us-west-2"
 }
 
 variable "pro_id" {
   description = "ID of the project"
   type        = string
-  default     = "infradex"
 }
 
-variable "pro_environment" {
+variable "pro_env" {
   description = "Environment (dev, staging, prod)"
   type        = string
-  default     = "dev"
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
   
   validation {
     condition = can(regex("^[tm][0-9][a-z]?\\.", var.instance_type))
