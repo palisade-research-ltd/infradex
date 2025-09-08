@@ -1,13 +1,13 @@
 
 module "networking" {
-  source     = "../../modules/networking"
-  pro_id     = var.pro_id
-  pro_env    = var.pro_env
+  source  = "../../modules/networking"
+  pro_id  = var.pro_id
+  pro_env = var.pro_env
 }
 
 module "roles" {
   source     = "../../modules/roles"
-  pro_id         = var.pro_id
+  pro_id     = var.pro_id
   depends_on = [module.networking]
 }
 

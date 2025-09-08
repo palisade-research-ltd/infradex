@@ -1,57 +1,116 @@
-# compile.Dockerfile - Direct libtorch download version
-FROM --platform=linux/arm64 rust:1.75
+# ARM64 Rust Compiler Dockerfile for AWS EC2 t4g.small
+# This Dockerfile builds a Rust collector binary with git dependencies for ARM64 architecture
 
-# Install system dependencies
+# Use multi-stage build for optimization
+FROM --platform=linux/arm64 lukemathwalker/cargo-chef:latest-rust-1.75 AS chef
+WORKDIR /app
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:$PATH
+
+# Install required build dependencies for ARM64
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
     pkg-config \
     libssl-dev \
-    curl \
-    wget \
-    unzip \
+    build-essential \
+    git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install libtorch for ARM64
-RUN cd /tmp && \
-    wget https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-latest.zip && \
-    unzip libtorch-shared-with-deps-latest.zip && \
-    mv libtorch /opt/ && \
-    rm libtorch-shared-with-deps-latest.zip
+# Configure Git to use HTTPS instead of SSH for dependencies
+RUN git config --global url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global url."https://".insteadOf "git://"
 
-# Set up environment variables for torch-sys
-ENV LIBTORCH=/opt/libtorch
-ENV LIBTORCH_USE_PYTORCH=0
-ENV TORCH_CUDA_VERSION=none
-ENV LD_LIBRARY_PATH=/opt/libtorch/lib:$LD_LIBRARY_PATH
-ENV LIBTORCH_LIB_DIR=/opt/libtorch/lib
-ENV LIBTORCH_INCLUDE_DIR=/opt/libtorch/include
+# Stage 1: Plan dependencies
+FROM chef AS planner
+COPY . .
+# Create recipe file for cargo-chef
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Create pkg-config file
-RUN mkdir -p /usr/local/lib/pkgconfig && \
-    cat > /usr/local/lib/pkgconfig/torch.pc << 'EOF'
-      prefix=/opt/libtorch
-      exec_prefix=${prefix}
-      libdir=${prefix}/lib
-      includedir=${prefix}/include
+# Stage 2: Build dependencies
+FROM chef AS builder
 
-      Name: torch
-      Description: PyTorch C++ Library
-      Version: 2.1.0
-      Libs: -L${libdir} -ltorch -ltorch_cpu -ltorch_global_deps
-      Cflags: -I${includedir} -I${includedir}/torch/csrc/api/include
-    EOF
+# Copy the recipe file
+COPY --from=planner /app/recipe.json recipe.json
 
-# Update pkg-config path
-ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+# Build dependencies (this layer will be cached)
+RUN cargo chef cook --release --recipe-path recipe.json
 
-# Verify installation
-RUN echo "LibTorch files:" && \
-    ls -la /opt/libtorch/lib/ | grep -E "\\.so" | head -5 && \
-    echo "Checking library architecture:" && \
-    file /opt/libtorch/lib/libtorch.so
+# Copy source code
+COPY . .
 
-WORKDIR /workspace
+# Create a proper Cargo.toml for the collector binary
+RUN mkdir -p src/bin
 
-# Default command
-CMD ["echo", "LibTorch ARM64 compilation environment ready"]
+# Create the collector binary Cargo.toml entry if not exists
+# This ensures the collector.rs can be built as a binary
+COPY <<EOF Cargo.toml
+[package]
+name = "collector"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "collector"
+path = "src/bin/collector.rs"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+
+# Git dependencies - using HTTPS instead of SSH
+atelier_data = { git = "https://github.com/IteraLabs/atelier-rs.git" }
+ix_execution = { git = "https://github.com/your-org/ix-execution.git", optional = true }
+ix_cex = { git = "https://github.com/your-org/ix-cex.git", optional = true }
+
+# If the above git repos don't exist or are private, you can replace with:
+# atelier_data = { path = "./atelier-data" }  # if you have local copy
+# ix_execution = { path = "./ix-execution" }  # if you have local copy  
+# ix_cex = { path = "./ix-cex" }  # if you have local copy
+
+[features]
+default = ["ix_execution", "ix_cex"]
+ix_execution = ["dep:ix_execution"]
+ix_cex = ["dep:ix_cex"]
+EOF
+
+# Build the collector binary for ARM64
+RUN cargo build --release --bin collector
+
+# Stage 3: Extract the binary to output directory
+FROM --platform=linux/arm64 debian:bookworm-slim AS extractor
+WORKDIR /output
+
+# Copy the compiled binary
+COPY --from=builder /app/target/release/collector ./collector
+
+# Make it executable
+RUN chmod +x ./collector
+
+# Create a simple script to copy the binary to the host
+RUN echo '#!/bin/bash' > extract.sh \
+    && echo 'cp /output/collector /host/collector' >> extract.sh \
+    && chmod +x extract.sh
+
+# Default command to extract binary
+CMD ["./extract.sh"]
+
+# Alternative: Create a final runtime stage (optional)
+FROM --platform=linux/arm64 debian:bookworm-slim AS runtime
+WORKDIR /app
+
+# Install runtime dependencies if needed
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the binary
+COPY --from=builder /app/target/release/collector .
+
+# Make it executable
+RUN chmod +x collector
+
+# Expose any ports your collector might use (adjust as needed)
+EXPOSE 8080
+
+# Run the collector
+CMD ["./collector"]

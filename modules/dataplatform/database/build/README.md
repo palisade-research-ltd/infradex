@@ -1,5 +1,12 @@
 # Initial Build for Database
 
+## Build
+
+- previous (server): 
+- `build/database.Dockerfile`: 
+    - Copy files: config.xml, users.xml, init-xx-schema.sql
+- `scripts/database_entrypoint.sh`:
+
 ## Schemas
 
 - Orderbooks (orderbooks - ob)

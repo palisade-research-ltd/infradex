@@ -11,6 +11,9 @@ database = "operations"
 username = "default"
 password = ""
 
+[connection]
+timeout = "30s"
+retry_attempts = 3
 batch_size = 1000
 flush_interval_seconds = 30
 

@@ -16,8 +16,7 @@ RUN useradd -r -u 1001 appuser
 RUN mkdir -p /app/logs /app/data /app/config && \
     chown -R appuser:appuser /app
 
-# Copy files - using the exact paths that should exist in build context
-# When building from /opt/infradex, these paths should be relative to that
+# If the compiled binary already exists
 COPY datacollector/build/datacollector_arm_64 /usr/local/bin/datacollector
 COPY datacollector/configs/datacollector_config.toml /app/config/
 
@@ -41,3 +40,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Run the collector
 CMD ["/usr/local/bin/datacollector"]
+

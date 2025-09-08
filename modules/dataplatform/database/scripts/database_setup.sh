@@ -56,8 +56,9 @@ docker network create infradex-network 2>/dev/null || echo "Network already exis
     -p 8123:8123 \
     -p 9000:9000 \
     database:latest \
-    
+  
   echo "Database container started successfully"
+
 else
   echo "ERROR: database.Dockerfile not found"
   exit 1

@@ -54,3 +54,26 @@ ls -la /opt/infradex/server/build/
 ls -la /opt/infradex/server/configs/
 ls -la /opt/infradex/server/scripts/
 
+# --- Compile binary --- #
+cd /opt/infradex/server/build
+echo "Current directory: $(pwd)"
+
+docker build --no-cache -f datacollector_compiler.Dockerfile -t datacollector . || exit 1
+echo "Datacollector Docker image built successfully"
+
+docker run -d \
+  --name datacollector_compiler \
+  datacollector_compiler:latest \
+
+echo "Docker success run"
+
+# Make it executable
+RUN chmod +x ./datacollector
+
+# Create a simple script to copy the binary to the host
+RUN echo '#!/bin/bash' > extract.sh \
+    && echo 'cp /datacollector /host/datacollector' >> extract.sh \
+    && chmod +x extract.sh
+
+# Default command to extract binary
+CMD ["./extract.sh"]
